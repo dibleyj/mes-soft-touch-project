@@ -7,10 +7,11 @@
 
 DigitalOut led1(LED1);
 DigitalOut led2(LED2);
-DigitalIn sw1(SW1);
-DigitalIn sw3(SW3);
+InterruptIn sw1(SW1);
+InterruptIn sw3(SW3);
 
-bool g_flash_enable{false};
+volatile bool g_flash_enable{false};
+volatile bool g_faster{false};
 volatile unsigned g_flash_delay{500};
 volatile unsigned g_seque_delay{500};
 
@@ -18,17 +19,15 @@ bool pressed(DigitalIn sw)  { return !sw; }
 void bright(DigitalOut led) { led = 0; }
 void dark(DigitalOut led)   { led = 1; }
 
-void task_read_switches(void)
+void sw1_handler(void)
 {
-    if (pressed(sw1)) 
-    {
-        g_flash_enable = true;
-    }
-    else 
-    {
-        g_flash_enable = false;
-    }
-    if (pressed(sw3))
+    g_flash_enable = !g_flash_enable;
+}
+
+void sw3_handler(void)
+{
+    g_faster = !g_faster;
+    if (g_faster)
     {
         g_flash_delay = 200;
         g_seque_delay = 200;
@@ -36,7 +35,7 @@ void task_read_switches(void)
     else 
     {
         g_flash_delay = 500;
-        g_seque_delay = 500; 
+        g_seque_delay = 500;
     }
 }
 
@@ -71,10 +70,10 @@ void task_sequence(void)
 int main()
 {
     printf("This is the bare metal blinky example running on Mbed OS %d.%d.%d.\n", MBED_MAJOR_VERSION, MBED_MINOR_VERSION, MBED_PATCH_VERSION);
-
+    sw1.fall(&sw1_handler);
+    sw3.fall(&sw3_handler);
     while (true)
     {
-        task_read_switches();
         task_flash();
         task_sequence();
     }
