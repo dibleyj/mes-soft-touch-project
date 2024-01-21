@@ -54,16 +54,31 @@ void task_flash(void)
 
 void task_sequence(void)
 {
+    static enum {STATE_RED, STATE_GREEN, STATE_OFF} next_state;
+    static bool ticktock = false;
     if (!g_flash_enable)
     {
-        bright(led1);
-        thread_sleep_for(g_seque_delay);
-        dark(led1);
-        thread_sleep_for(g_seque_delay);
-        bright(led2);
-        thread_sleep_for(g_seque_delay);
-        dark(led2);
-        thread_sleep_for(g_seque_delay);
+        switch (next_state)
+        {
+            case STATE_RED:
+                bright(led1);
+                thread_sleep_for(g_seque_delay);
+                next_state = STATE_OFF;
+                break;
+            case STATE_GREEN:
+                bright(led2);
+                thread_sleep_for(g_seque_delay);
+                next_state = STATE_OFF;
+                break;
+            case STATE_OFF:
+            default:
+                dark(led1);
+                dark(led2);
+                thread_sleep_for(g_seque_delay);
+                ticktock = !ticktock;
+                if (ticktock) next_state = STATE_GREEN; else next_state = STATE_RED;
+                break;
+        }        
     }
 }
 
