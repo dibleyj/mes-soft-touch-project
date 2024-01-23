@@ -19,6 +19,12 @@ mbed_configure_app_target(${APP_TARGET})
 
 target_sources(${APP_TARGET}
     PRIVATE
+        ui/button.h 
+        ui/led.h 
+        ui/ui.h 
+        
+        soft_touch.h
+
         main.cpp
 )
 

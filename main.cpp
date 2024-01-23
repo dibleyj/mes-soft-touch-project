@@ -1,9 +1,10 @@
 /* JD's hacked mbed (bare-metal) blinky
- * Based in large part on chap 3 of A.G. Dean 
+ * Based in part on chap 3 of A.G. Dean's
  * "Embedded Systems Fundamentals with Arm Cortex-M based Microcontrollers"
  */
 
 #include "mbed.h"
+#include "mbed_events.h"
 #include <chrono>
 using namespace std::chrono;
 
@@ -12,6 +13,7 @@ DigitalOut led2(LED2);
 InterruptIn sw1(SW1);
 InterruptIn sw3(SW3);
 Timeout led_timeout;
+
 
 volatile bool g_flash_enable{false};
 volatile bool g_faster{false};
@@ -112,13 +114,14 @@ void task_sequence(void)
 int main()
 {
     printf("This is the bare metal blinky example running on Mbed OS %d.%d.%d.\n", MBED_MAJOR_VERSION, MBED_MINOR_VERSION, MBED_PATCH_VERSION);
+    EventQueue *slow_queue = mbed_event_queue();
+    
     sw1.fall(&sw1_handler);
     sw3.fall(&sw3_handler);
     led_timeout.attach(&task_sequence, k_led_slow);
+
     while (true)
     {
         thread_sleep_for(200);
-        // task_flash();
-        // task_sequence();
     }
 }
