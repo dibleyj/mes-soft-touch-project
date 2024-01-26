@@ -60,6 +60,7 @@ namespace soft_touch
         static eIoError 
         IoInit(void)
         {
+            dev_uart.set_baud(115200);
             return IO_SUCCESS;
         }
 
