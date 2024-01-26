@@ -24,6 +24,13 @@ target_sources(${APP_TARGET}
         console/console.h
         console/console.cpp
 
+        drivers/slcd/FRDM-s401.h 
+        drivers/slcd/LCD.h 
+        drivers/slcd/LCDConfig.h
+        drivers/slcd/LCD.cpp
+        drivers/slcd/s401.c 
+        drivers/slcd/STLCD.h 
+
         main.cpp
 )
 
