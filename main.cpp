@@ -6,12 +6,12 @@
 #include "soft_touch.h"
 #include "STLCD.h"
 #include "console.h"
-#include <cstdint>
 using namespace std::chrono;
 using namespace soft_touch;
 
 DigitalOut led1(LED1);
 Ticker sys_tick; 
+USBMIDI midi;
 
 void heartbeat()
 {
@@ -24,6 +24,7 @@ void heartbeat()
     else if (counter < 0x2710)
     {
         led1 = 1;
+        // STLCD::instance().queue();
     } 
     else 
     {
@@ -38,7 +39,7 @@ int main()
     Console dev_console;
     dev_console.Init();
     sys_tick.attach(&heartbeat, 100us);
-    
+
     static uint8_t whatever{0};
     while(1) 
     {
@@ -46,6 +47,10 @@ int main()
         dev_console.Process();
         STLCD::instance().WriteUint8H(STLCD::LH, whatever);
         STLCD::instance().WriteUint8H(STLCD::RH, UINT8_MAX - whatever);
+        // STLCD::instance().lcd_queue.call()
+        midi.write(MIDIMessage::NoteOn(64));
+        ThisThread::sleep_for(150ms);
+        midi.write(MIDIMessage::NoteOff(64));
         whatever++;
     }
 }

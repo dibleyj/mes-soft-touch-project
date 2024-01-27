@@ -1,13 +1,24 @@
 {
-    "requires": ["bare-metal", "events"],
+    "config": {
+        "usb_speed": {
+            "help": "USE_USB_FS",
+            "value": "USE_USB_FS"
+        }
+    },
+    "requires": ["bare-metal", "events", "drivers-usb"],
     "target_overrides": {
       "*": {
-        "target.c_lib": "small",
-        "target.printf_lib": "minimal-printf",
+        "events.shared-dispatch-from-application": true,
+        "platform.callback-nontrivial": true,
         "platform.minimal-printf-enable-floating-point": false,
         "platform.stdio-minimal-console-only": true,
-        "platform.callback-nontrivial": true,
-        "events.shared-dispatch-from-application": true
+        "target.c_lib": "small",
+        "target.printf_lib": "minimal-printf"
+      },
+      "KL46Z": {
+        "platform.default-serial-baud-rate": 115200,
+        "platform.stdio-baud-rate": 115200,
+        "target.device_has_add": ["USBDEVICE"]
       }
     }
 }

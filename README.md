@@ -1,137 +1,69 @@
-# JD's hacked bare metal blinky Mbed OS example
+# JD's Soft Touch 
 
-## Application functionality
+## Pitch
 
-The `main()` function toggles the state of a digital output connected to an LED on the board.
+Soft Touch is a tech demo for a USB MIDI control surface providing a single endless rotary encoder. The encoder can be assigned to send USB-MIDI Control Change messages.
 
-## Building and running
+Soft Touch allows the user to choose between different encoder-to-CC-message mappings, meaning that the encoder can change several parameters on a software instrument (although only one at a time, for now).
 
-1. Connect a USB cable between the USB port on the target and the host computer.
-1. Run the following command to build the example project, program the microcontroller flash memory, and open a serial terminal:
+## Tech overview 
 
-   ```
-   $ mbed compile -m <TARGET> -t <TOOLCHAIN> --flash --sterm
-   ```
+I developed and built this app using Mbed Studio on an Apple (Silicon) Mac mini. 
+
+NOTE: I did take a pretty concerted stab at getting Platform IO or the Mbed CLI tools to do it for me instead, but had total blocker problems getting built binaries onto my dev board: something to do with the  `pyocd` being called by those tools. I installed Mbed Studio and suddenly programming my board became possible. To figure about later. 
+
+Mbed Studio seems nice. It uses CMake to organise the project, which I have met before and can just about deal with. The project CMakeLists.txt doesn't follow best practices - I just jammed the source files into that big list - I'll get to it.
+
+This project was built against Mbed OS `6.17.0` in the `bare-metal` profile. The dev board is the NRND/EOLed NXP/Freescale KL46Z, which I received about five years ago as part of a 1-week training course.
+
+In principle, you can build this project for any Mbed-supporting dev board with the `USBDEVICE` capability. I haven't tested this yet and I haven't prepared a schematic for the off-board electronics yet either. 
+
+## Building the project
+
+(Note: Untested approximation of what you'd need to do to set up to build the project from scratch.)
+
+1. Install Mbed Studio 
+2. Set up a local checkout of the Mbed OS files. There are lots of these and I wanted to keep them outside my project. To do this: 
+3. Create a 'New Program' (select 'Mbed OS 6' and 'Empty Mbed Program') in a directory. The tools will download Mbed OS 6.
+4. Clone this project's repo into a nearby directory. 
+5. Open the project directory 
+6. (Fudge ahead:) Link the project to the directory where the Mbed OS 6 download is.
+7. Hit build and send to the board. 
+
+### Build / test advisories  
+
+* Mbed `6.17.0`'s target definition for the Freescale KL46Z doesn't identify the board with `USBDEVICE` functionality, but the board can do it (the populated USB mini-B is a dead giveaway). I've overridden this in the `mbed_app.json` project file. 
+*However*, the `mbed-os/targets/TARGET_Freescale/USBPhy_Kinetis.cpp` file will not compile until you lean in and add missing `#include <cstddef>` and `#include <cstring>` to satisfy definitions for `NULL` and `memset`.
+
+* You will need to set the Mbed Studio's `Serial Monitor` baud rate to `115200` or you'll only see some of the monitor messages.
+
+* You will need to connect a USB host to the second USB port on the KL46Z (i.e., the one that isn't the programmer port), because the `USBMIDI` driver blocks until it sees a connection.
+
+* On the KL46Z you can interact with the dev console from Mbed Studio's `Serial Monitor` pane (if you set the baud rate, it's 115k2). 
+
+I was determined to make myself do a bunch of this work in CPP, which I'm rusty with, and to try to come to terms with approaches and patterns for concurrent-ish embedded outside the paradigm I'm reasonably familiar with (e.g., message-passing on the XMOS microcontrollers). Please be critical concerning my OOP!
+
+## Attribution and licenses
 
 
-Your PC may take a few minutes to compile your code.
 
-The binary is located at `./BUILD/<TARGET>/<TOOLCHAIN>/mbed-os-example-blinky-baremetal.bin`.
+### Mbed OS
 
-Alternatively, you can manually copy the binary to the target, which gets mounted on the host computer through USB.
+[Mbed OS] is provided under the Apache-2.0 license. Contributions to this project are accepted under the same license. 
 
-Depending on the target, you can build the example project with the `GCC_ARM`, `ARM` or `IAR` toolchain. After installing Arm Mbed CLI, run the command below to determine which toolchain supports your target:
+This project [i.e., Mbed OS] contains code from other projects. The original license text is included in those source files. They must comply with our license guide.
+
+### Freescale segment LCD driver 
+
+The files 
 
 ```
-$ mbed compile -S
+FRDM-s401.h 
+LCDConfig.h 
+s401.c 
+LCD.h 
+LCD.cpp
 ```
 
-## Expected output 
+were sourced from the software pack provided with the dev board (I made some modifications to the `LCD` class, but the greater part of it is not original code). I think these are in large part files from Freescale - although the board support package that survives on the NXP site is in some weird self-extracting format that made this unreasonably hard to confirm. I reckon the LCD class was implemented by staff at the training provider, and I couldn't find a license file in the package. Not ideal, but I can re-implement it if need be. The `STLCD` derived class is my work.
 
-The LED on your target turns on and off every 500 milliseconds, and the serial terminal shows an output similar to: 
-
-```
---- Terminal on /dev/tty.usbmodem21102 - 9600,8,N,1 ---
-This is the bare metal blinky example running on Mbed OS 99.99.99.
-``` 
-
-## Configuring the application
-
-### The bare metal profile
-
-The bare metal profile is a configuration of Mbed OS that excludes the RTOS, as well as other features. We designed it specifically for ultraconstrained devices because it gives you more control over the system. For more details, please see [the bare metal documentation](https://os.mbed.com/docs/mbed-os/latest/reference/mbed-os-bare-metal.html)
-
-To build with the bare metal profile, the application configuration file must contain:
-
-```json
-{
-    "requires": ["bare-metal"]
-}
-```
-
-### Futher optimizations
-Some of the configurations shown below are already set by default in `targets/targets.json` and `platform/mbed_lib.json`.
-#### Linking with smaller C libraries
-
-Both the `ARM` and `GCC_ARM` toolchains support optimized versions of their C standard libraries, microlib and newlib-nano. We recommend using them with the bare metal profile.
-
-To build with the smaller C libraries, modify the application configuration file:
-
-```json
-{
-    "target_overrides": {
-        "*": {
-            "target.c_lib": "small"
-        }
-    }
-}
-```
-
-The build system reverts to the standard C library if support for the small C library is not enabled for your target. You can find more information [here]( https://github.com/ARMmbed/mbed-os-5-docs/blob/development/docs/program-setup/bare_metal/c_small_libs.md).
-
-#### Using Mbed minimal printf library
-
-Mbed OS offers a smaller `printf()` alternative. The [minimal printf](https://github.com/ARMmbed/mbed-os/blob/master/platform/source/minimal-printf/README.md) library implements a subset of the `v/s/f/printf` function family, and you can disable floating points to further reduce code size.
-
-To build with the minimal printf library and disable floating points printing, you need to modify the application configuration file:
-
-```json
-{
-    "target_overrides": {
-        "*": {
-            "target.printf_lib": "minimal-printf",
-            "platform.minimal-printf-enable-floating-point": false
-        }
-    }
-}
-```
-
-Further optimizations are possible. For more details, please see the minimal printf README.
-
-#### Using a minimal console
-
-If your application only needs unbuffered I/O operations, you can save additional memory by using a configuration of the platform library, which removes file handling functionality from the [system I/O retarget code](https://github.com/ARMmbed/mbed-os/blob/master/platform/source/mbed_retarget.cpp).
-
-To build with the minimal console functionality, modify the application configuration file:
-
-```json
-{
-    "target_overrides": {
-        "*": {
-            "platform.stdio-minimal-console-only": true
-        }
-    }
-}
-```
-
-#### Memory comparison
-
-The below table shows the result for the blinky bare metal application compiled with the release profile on K64F for the GCC_ARM toolchain.
-
-The baseline configuration used is the blinky bare metal application built with the standard C library.
-
-Mbed OS release: mbed-os-6.0.0-alpha-2
-
-|Standard C lib|Small C lib|Minimal printf|Minimal console|RAM|Flash|
-| :---:        | :---:     | :---:        | :---:         | :---: | :---: |
-| X            |           |              |               | 0 | 0 |
-|              | X         |              |               | -2,592 | -28,581 |
-|              | X         | X            |               | -2,592 | -29,918 |
-|              | X         | X            | X             | -2,592 | -30,810 |
-
-## Troubleshooting 
-
-If you have problems, you can review the [documentation](https://os.mbed.com/docs/latest/tutorials/debugging.html) for suggestions on what could be wrong and how to fix it. 
-
-## Related links 
-
-- [Mbed OS bare metal](https://os.mbed.com/docs/mbed-os/latest/reference/mbed-os-bare-metal.html).
-- [Mbed OS configuration](https://os.mbed.com/docs/latest/reference/configuration.html). 
-- [Mbed OS serial communication](https://os.mbed.com/docs/latest/tutorials/serial-communication.html). 
-- [Mbed boards](https://os.mbed.com/platforms/).
-
-### License and contributions
-
-The software is provided under the Apache-2.0 license. Contributions to this project are accepted under the same license. Please see [contributing.md](./CONTRIBUTING.md) for more information.
-
-This project contains code from other projects. The original license text is included in those source files. They must comply with our license guide.

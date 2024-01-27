@@ -15,9 +15,9 @@ public:
         return m_instance;
     }
 
-    
-
     ~STLCD() {}
+
+    static EventQueue lcd_queue;
 
     enum Position
     {
@@ -59,9 +59,7 @@ public:
 
     private:
 
-    STLCD() : SLCD(), lcd_queue() {}
-
-    EventQueue lcd_queue; 
+    STLCD() : SLCD() {}
 
     enum UtilResult
     {
