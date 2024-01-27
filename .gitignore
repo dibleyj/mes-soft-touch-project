@@ -1,2 +1,4 @@
 mbed-os
 BUILD
+.mbed
+QEI

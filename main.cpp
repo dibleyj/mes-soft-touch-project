@@ -6,12 +6,15 @@
 #include "soft_touch.h"
 #include "STLCD.h"
 #include "console.h"
+#include "QEI.h"
 using namespace std::chrono;
 using namespace soft_touch;
 
 DigitalOut led1(LED1);
 Ticker sys_tick; 
 USBMIDI midi;
+QEI enc1(D2, D3, NC, 24, QEI::X2_ENCODING);
+int32_t pulses; 
 
 void heartbeat()
 {
@@ -30,6 +33,7 @@ void heartbeat()
     {
         counter = 0;
     }
+    pulses = enc1.getPulses();
 }
 
 
@@ -39,7 +43,7 @@ int main()
     Console dev_console;
     dev_console.Init();
     sys_tick.attach(&heartbeat, 100us);
-
+    int32_t pulses_memory{0};
     static uint8_t whatever{0};
     while(1) 
     {
@@ -52,6 +56,8 @@ int main()
         ThisThread::sleep_for(150ms);
         midi.write(MIDIMessage::NoteOff(64));
         whatever++;
+        if (pulses != pulses_memory) printf("Pulses on ST encoder are: %i\n", pulses);
+        pulses_memory = pulses;
     }
 }
 

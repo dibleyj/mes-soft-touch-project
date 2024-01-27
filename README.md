@@ -43,6 +43,17 @@ In principle, you can build this project for any Mbed-supporting dev board with 
 
 I was determined to make myself do a bunch of this work in CPP, which I'm rusty with, and to try to come to terms with approaches and patterns for concurrent-ish embedded outside the paradigm I'm reasonably familiar with (e.g., message-passing on the XMOS microcontrollers). Please be critical concerning my OOP!
 
+## Calculations
+
+### Encoder data stream 
+Assembled against a Bourns PEC11R rotational encoder https://uk.farnell.com/bourns/pec11r-4225f-s0024/encoder-incremental-2ch-60rpm/dp/2381866) with the following specs:
+
+* max. operating RPM: 60
+* pulses per revolution: 24
+* theoretical max output from single encoder: 24 pulses per second 
+* so min. sampling rate: 96 samples per second
+
+
 ## Attribution and licenses
 
 
@@ -53,9 +64,19 @@ I was determined to make myself do a bunch of this work in CPP, which I'm rusty 
 
 This project [i.e., Mbed OS] contains code from other projects. The original license text is included in those source files. They must comply with our license guide.
 
+### CLI implementation
+
+The CLI implementation in this project is a fairly crude CPP port of the code Elecia presented in the Wokwi RPi simulation, extended with some new cnmmands.
+
+### Quadrature Encoder Interface (QEI)
+
+(C) 2010 Arm, MIT license, original author: Aaron Berk. https://os.mbed.com/users/aberk/code/QEI/
+
+As hosted at that URL, this is an Mbed 2 driver - I put some effort into making it build against Mbed 6.
+
 ### Freescale segment LCD driver 
 
-The files 
+I originally obtained the Freescale dev board on a training course around five years ago. The project files 
 
 ```
 FRDM-s401.h 
@@ -65,5 +86,7 @@ LCD.h
 LCD.cpp
 ```
 
-were sourced from the software pack provided with the dev board (I made some modifications to the `LCD` class, but the greater part of it is not original code). I think these are in large part files from Freescale - although the board support package that survives on the NXP site is in some weird self-extracting format that made this unreasonably hard to confirm. I reckon the LCD class was implemented by staff at the training provider, and I couldn't find a license file in the package. Not ideal, but I can re-implement it if need be. The `STLCD` derived class is my work.
+were sourced from the software pack provided with the dev board (I made some modifications to the `LCD` class, but the greater part of it is not original code). I think these are in large part files from Freescale (although the board support package that survives on the NXP site is in some weird self-extracting format that made this unreasonably hard to confirm). I reckon the LCD class was implemented by staff at the training provider, and I couldn't find a license file in the package. Not ideal, but I can re-implement it if need be. 
+
+The `STLCD` derived class and a couple of the LCD class methods are my own work.
 
