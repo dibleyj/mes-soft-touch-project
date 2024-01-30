@@ -32,7 +32,9 @@ enum STEvent : std::uint16_t
     EventMsgRx,
     EventMsgRxFail,
     DevCliDisplayTest,
-    UiEncoderTurn,
+    SysCtrlUpdateTargetCc,
+    SysCtrlUpdateTargetCtrlVal,
+    SysCtrlLoadMapping,
     numSTEvents
 };
 

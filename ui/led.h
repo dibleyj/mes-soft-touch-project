@@ -3,17 +3,22 @@
 
 namespace soft_touch {
     class Led {
-    private:
-        DigitalOut d_o;
-
+ 
     public:
         Led(PinName pn)
             : d_o(pn)
         {
-
+            d_o = 1;
         }
         ~Led(void);
-        Led(const Led&) = delete;
+
+        void Light(bool on) { on ? (d_o = 0) : (d_o = 1); }
+
+
         void operator=(const Led&) = delete;
+
+    private:
+        DigitalOut d_o;
+
     };
 }

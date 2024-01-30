@@ -1,8 +1,7 @@
 #pragma once
 #include "soft_touch.h"
-#include "sysctrlstateinterface.h"
-#include "sysctrlstate.h"
-#include "syscfgstate.h"
+#include "sysctrlmappinginterface.h"
+#include "sysctrlmapping.h"
 
 namespace soft_touch 
 {
@@ -14,7 +13,7 @@ public:
     instance()
     {
         static SystemController m_instance;
-        m_instance.state = &ctrl_state;
+        
         return m_instance;
     }
 
@@ -40,28 +39,30 @@ public:
     }
 
 private: 
-    SystemController() 
-    {}
+    SystemController()
+        : mapping(mappings)
+    {
+
+    }
 
     ~SystemController() {}
 
     void ProcessRxEvents()
     {
         if (rx_events.empty()) return; 
-        // printf("SysCtrl: rx queue: %u\r\n", rx_events.size());
         STEventMessage rx = {STNode::None, STNode::None, STEvent::Invalid, 0};
         rx_events.pop(rx);
-        state->UpdateControl(rx);
+        mapping->UpdateMapping(rx);
         return;
     } 
 
-    SysCtrlStateInterface *state; 
+    SysCtrlMappingInterface *mapping; 
 
-    static SysCtrlState ctrl_state;
+    static const uint8_t k_num_mappings{8};
 
-    static SysCfgState cfg_state;
+    static SysCtrlMapping mappings[k_num_mappings];
 
-    static const uint8_t k_event_buffer_size{16};
+    static const uint8_t k_event_buffer_size{8};
 
     CircularBuffer<STEventMessage,k_event_buffer_size> rx_events; 
 };

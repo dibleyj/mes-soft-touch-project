@@ -10,6 +10,7 @@ public:
     UiStateInterface(){}
     virtual ~UiStateInterface(){}
     virtual void Turn( /* TO DO */ ) = 0;
+    virtual void Press( /* TO DO */ ) = 0;
 };
 
 }
