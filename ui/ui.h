@@ -33,7 +33,19 @@ namespace soft_touch {
         void Poll()
         {
             for (uint8_t i = 0; i < numUiButtons; i++) buttons[i].Debounce();
-            for (uint8_t i = 0; i < numUiEncoders; i++) encoders[i]->GetDelta();
+            static uint8_t slow_poll = 0;
+            // HACK: slow encoder response down while selecting mappings
+            if (current_mode == &cfg_mode) 
+            {
+                if ((++slow_poll & 0xF0) == 0) 
+                {
+                    for (uint8_t i = 0; i < numUiEncoders; i++) encoders[i]->GetDelta();                    
+                }
+            }
+            else 
+            {
+                for (uint8_t i = 0; i < numUiEncoders; i++) encoders[i]->GetDelta();
+            }
         }
 
         void Process()
