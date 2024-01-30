@@ -5,6 +5,7 @@
 #include "ui.h"
 #include "console.h"
 #include "system.h"
+#include "UsbMidiTransceiver.h"
 
 using namespace std::chrono;
 using namespace soft_touch;
@@ -29,11 +30,14 @@ int main()
     Console::instance().Init();
     SystemController::instance().Init();
     Ui::instance().Init();
+    // Warning: blocks until a USB host connects...
+    UsbMidiTransceiver::instance().Init(); 
     sys_tick.attach(&SystemTick, 125us);
     while(1) 
     {
         ThisThread::sleep_for(1ms);
         Console::instance().Process();
+        UsbMidiTransceiver::instance().Process();
         SystemController::instance().Process();
         Ui::instance().Process();
     }

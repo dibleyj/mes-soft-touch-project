@@ -1,6 +1,7 @@
 #pragma once
 #include "soft_touch.h"
 #include "sysctrlmappinginterface.h"
+#include "UsbMidiTransceiver.h"
 
 namespace soft_touch 
 {
@@ -10,7 +11,6 @@ class SysCtrlMapping : public SysCtrlMappingInterface
 public:
     SysCtrlMapping(uint8_t index, uint8_t target_chan, uint8_t target_cc_num, uint8_t value) 
         : SysCtrlMappingInterface(index, target_chan, target_cc_num)
-        , idx(index)
         , target_value(value)
     {}
 
@@ -46,14 +46,20 @@ public:
     };
 
 private:
-    uint8_t target_value, idx;
+    uint8_t target_value;
     
     void UpdateMappingTargetValue(int8_t delta)
     {
         uint8_t nv = ClampEncoderInt8Reading(target_value, delta);
         if (nv != target_value) target_value = nv;
+        // printf("mapping %u is now -> %u\r\n", index, target_value);
         // TODO: Send to UsbMidi
-        printf("mapping %u is now -> %u\r\n", idx, target_value);
+        STEventMessage midi_m{SysCtrl, UsbMidi, UsbMidiCcMsgToHost, 0};
+        midi_m.v = (target_chan << 24 | target_cc << 16 | target_value );
+        // printf("midi_m.v = %X\r\n", midi_m.v);
+        UsbMidiTransceiver::instance().Post(midi_m);
+        // TODO: Send to Ui
+
     }
 
     int8_t ClampEncoderInt8Reading(int8_t cv, int8_t d)

@@ -63,8 +63,6 @@ private:
         default:
             break;
         }
-
-        return;
     } 
 
     void LoadNewMapping(int8_t delta)

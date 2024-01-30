@@ -8,11 +8,11 @@ class SysCtrlMappingInterface
 {
     // Apply 'State' design pattern 
 public: 
-    SysCtrlMappingInterface(uint8_t index, uint8_t target_chan, uint8_t target_cc){}
+    SysCtrlMappingInterface(uint8_t index, uint8_t target_chan, uint8_t target_cc)
+        : index(index), target_chan(target_chan), target_cc(target_cc)
+    {}
     virtual ~SysCtrlMappingInterface(){}
     virtual void UpdateMapping(STEventMessage m) = 0;
-
-private:
     uint8_t index;
     uint8_t target_chan;
     uint8_t target_cc;

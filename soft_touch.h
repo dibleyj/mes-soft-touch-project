@@ -35,6 +35,7 @@ enum STEvent : std::uint16_t
     SysCtrlUpdateTargetCc,
     SysCtrlUpdateTargetCtrlVal,
     SysCtrlLoadMapping,
+    UsbMidiCcMsgToHost,
     numSTEvents
 };
 
