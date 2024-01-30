@@ -4,9 +4,9 @@
   public:
 	    //! Construct an SLCD object
 	    SLCD()
+            : CharPosition(0)
         {
             init();
-            CharPosition = 0;
         }
 
         ~SLCD();
@@ -45,10 +45,14 @@
 	    void deepsleepEnable(bool enable);
 
 	private:
-	    void init();
-	    // Write char to next display element
+    
+	    
+        void init();
+	    
+        // Write char to next display element
 	    void Write_Char(char lbValue);
-	    virtual int _putc(int c);
-	  static const uint32_t MASK_BIT[32];
+	    
+        virtual int _putc(int c);
 
+	    static const uint32_t MASK_BIT[32];
   };

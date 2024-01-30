@@ -7,6 +7,93 @@ namespace soft_touch
  
     class Console 
     {
+    public:
+        static Console &
+        instance(void)
+        {
+            static Console m_instance;
+            return m_instance;
+        }
+       
+
+        ~Console(void) {}
+
+        Console(const Console&) = delete;
+        void operator=(const Console&) = delete;
+
+        void 
+        Init(void)
+        {            
+
+            IoInit();
+            IoSendLine("JD's Soft Touch running on bare-metal Mbed OS\n");
+            IoSendString(prompt);
+
+            mReceivedSoFar = 0u;
+
+            for (int i = 0u; i < MAX_COMMAND_LENGTH; i++)
+            {
+                mReceiveBuffer[i] = nullchar;
+            }
+        }
+
+        void 
+        Process(void)
+        {       
+            const sCommandTable_T* commandTable;
+            int32_t cmdEndLine{0}; 
+            int32_t found{0};
+            uint32_t cmdIndex{0};
+            eCommandResult_T result;
+
+            if (IO_SUCCESS == IoReceive() || mReceiveBufferNeedsChecking)
+            {
+
+                mReceiveBufferNeedsChecking = false;
+                cmdEndLine = CommandEndLine(mReceiveBuffer, mReceivedSoFar);
+                if (cmdEndLine >= 0)
+                {
+                    IoSendLine(NULL);
+                    // printf("[ %s ]\n", mReceiveBuffer);
+                    // we have complete string, find command
+                    commandTable = CommandsGetTable();
+                    cmdIndex = 0; 
+                    found = NOT_FOUND;
+                    while ( ( NULL != commandTable[cmdIndex].name ) && ( NOT_FOUND == found ) )
+                    {
+                        if ( CommandMatch(commandTable[cmdIndex].name, mReceiveBuffer) )
+                        {
+                            result = commandTable[cmdIndex].execute(mReceiveBuffer);
+                            if ( COMMAND_SUCCESS != result )
+                            {
+                                IoSendString("Error: ");
+                                IoSendLine(mReceiveBuffer);
+                                IoSendString("Help: ");
+                                IoSendLine(commandTable[cmdIndex].help);
+                            }
+                            found = cmdIndex;
+                        }
+                        else 
+                        {
+                            cmdIndex++;
+                        }
+                    }
+                    if ((cmdEndLine != 0) && (NOT_FOUND == found))
+                    {
+                        if (mReceivedSoFar > 2)
+                        {
+                            IoSendLine("Command not found.");
+                        }
+                    }
+                    // reset the buffer by moving over any leftovers and nulling the rest
+                    // clear up to and including the found endline character
+                    mReceivedSoFar = ResetBuffer(mReceiveBuffer, mReceivedSoFar, cmdEndLine + 1);
+                    mReceiveBufferNeedsChecking = mReceivedSoFar > 0 ? true : false;
+                    IoSendString(prompt);
+                }
+            }
+        }
+
     private:
         static const char * prompt;
         static const char * lf;
@@ -22,7 +109,7 @@ namespace soft_touch
         static constexpr uint8_t MAX_COMMAND_LENGTH{10};
         static constexpr uint8_t MAX_HELPTEXT_LENGTH{64};
 
-        static BufferedSerial dev_uart;
+        BufferedSerial dev_uart;
 
         char mReceiveBuffer[MAX_LENGTH];
 
@@ -51,16 +138,21 @@ namespace soft_touch
 
         static const sCommandTable_T mCommandTable[]; 
         
+        Console(void) : 
+            dev_uart(USBTX, USBRX)
+        { } 
+
         enum eIoError
         {
             IO_SUCCESS = 0u,
             IO_ERROR
         };
 
-        static eIoError 
+        eIoError 
         IoInit(void)
         {
             dev_uart.set_baud(115200);
+            dev_uart.set_format(8, BufferedSerial::None, 1);
             return IO_SUCCESS;
         }
 
@@ -244,7 +336,7 @@ namespace soft_touch
             eCommandResult_T result = COMMAND_SUCCESS;
 
             IGNORE_UNUSED_VARIABLE(buffer);
-            IoSendLine(version);
+            IoSendLine(ST_VER_INFO_STRING);
             return result;
         }
 
@@ -364,90 +456,7 @@ namespace soft_touch
             return result;
         }
 
-    public:
-        Console(void)
-        {
 
-            dev_uart.set_baud(9600);
-            dev_uart.set_format(8, BufferedSerial::None, 1);
-        } 
-
-        ~Console(void) {}
-
-        Console(const Console&) = delete;
-        void operator=(const Console&) = delete;
-
-        void 
-        Init(void)
-        {
-            IoInit();
-            IoSendLine("Welcome to the Consolinator...");
-            IoSendString(prompt);
-
-            mReceivedSoFar = 0u;
-
-            for (int i = 0u; i < MAX_COMMAND_LENGTH; i++)
-            {
-                mReceiveBuffer[i] = nullchar;
-            }
-        }
-
-        void 
-        Process(void)
-        {       
-            const sCommandTable_T* commandTable;
-            int32_t cmdEndLine{0}; 
-            int32_t found{0};
-            uint32_t cmdIndex{0};
-            eCommandResult_T result;
-
-            if (IO_SUCCESS == IoReceive() || mReceiveBufferNeedsChecking)
-            {
-
-                mReceiveBufferNeedsChecking = false;
-                cmdEndLine = CommandEndLine(mReceiveBuffer, mReceivedSoFar);
-                if (cmdEndLine >= 0)
-                {
-                    IoSendLine(NULL);
-                    // printf("[ %s ]\n", mReceiveBuffer);
-                    // we have complete string, find command
-                    commandTable = CommandsGetTable();
-                    cmdIndex = 0; 
-                    found = NOT_FOUND;
-                    while ( ( NULL != commandTable[cmdIndex].name ) && ( NOT_FOUND == found ) )
-                    {
-                        if ( CommandMatch(commandTable[cmdIndex].name, mReceiveBuffer) )
-                        {
-                            result = commandTable[cmdIndex].execute(mReceiveBuffer);
-                            if ( COMMAND_SUCCESS != result )
-                            {
-                                IoSendString("Error: ");
-                                IoSendLine(mReceiveBuffer);
-                                IoSendString("Help: ");
-                                IoSendLine(commandTable[cmdIndex].help);
-                            }
-                            found = cmdIndex;
-                        }
-                        else 
-                        {
-                            cmdIndex++;
-                        }
-                    }
-                    if ((cmdEndLine != 0) && (NOT_FOUND == found))
-                    {
-                        if (mReceivedSoFar > 2)
-                        {
-                            IoSendLine("Command not found.");
-                        }
-                    }
-                    // reset the buffer by moving over any leftovers and nulling the rest
-                    // clear up to and including the found endline character
-                    mReceivedSoFar = ResetBuffer(mReceiveBuffer, mReceivedSoFar, cmdEndLine + 1);
-                    mReceiveBufferNeedsChecking = mReceivedSoFar > 0 ? true : false;
-                    IoSendString(prompt);
-                }
-            }
-        }
 
     };
 }

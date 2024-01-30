@@ -15,10 +15,6 @@ public:
         return m_instance;
     }
 
-    ~STLCD() {}
-
-    static EventQueue lcd_queue;
-
     enum Position
     {
         DIGIT_0,
@@ -33,7 +29,7 @@ public:
     ClearDigit(Position pos)
     {
         CharPosition = static_cast<uint8_t>(pos);
-        SLCD::Write_Msg(" ");
+        Write_Msg(" ");
     }
 
     void
@@ -52,14 +48,12 @@ public:
         if (res == OK) Write_Msg(field, 2);
     }
 
-    void ProcessQueuedEvents(STEventSource src, STEvent event, uint32_t value)
-    {
-
-    }
 
     private:
 
     STLCD() : SLCD() {}
+
+    ~STLCD() {}
 
     enum UtilResult
     {

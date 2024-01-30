@@ -2,7 +2,7 @@
 
 namespace soft_touch 
 {
-    BufferedSerial Console::dev_uart(USBTX, USBRX);
+    // BufferedSerial Console::dev_uart(USBTX, USBRX);
     const char* Console::prompt = "> ";
     const char* Console::lf = "\r\n";
     const char* Console::version = "Soft Touch v0.0.1";
