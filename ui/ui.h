@@ -5,29 +5,18 @@
 #include "led.h"
 #include "button.h"
 #include "system.h"
+#include "encoder.h"
 #include "uistateinterface.h"
+#include "uicfgstate.h"
+#include "uictrlstate.h"
+#include <cstdio>
 
 using namespace std;
 
 namespace soft_touch {
 
     class Ui {
-    public: 
-        enum UiLight
-        {
-            BoardGreenLed,
-            BoardRedLed,
-            numUiLights
-        };
-
-        enum UiButton 
-        {   
-            BoardSwLH,
-            BoardSwRH,
-            EncoderSw,
-            numUiButtons
-        };
-
+    public:
         static Ui & 
         instance()
         {
@@ -43,42 +32,45 @@ namespace soft_touch {
 
         void Poll()
         {
-
             for (uint8_t i = 0; i < numUiButtons; i++) buttons[i].Debounce();
-            pulses = enc1.getPulses();
+            for (uint8_t i = 0; i < numUiEncoders; i++) encoders[i]->GetDelta();
         }
 
         void Process()
         {
             Heartbeat();
-
-            UpdateEncoder();
+            // work through queue of events shovelled out by SysCtrl
         }
 
-        void Light(UiLight light, bool on)
+        void Light(LightId light, bool on)
         {
             if (light < numUiLights) leds[light].Light(on);
         }
 
+        
 
     private: 
-        static const uint8_t k_num_encoders{1};
         static Led leds[numUiLights];
+        friend class Button;
+        friend class Encoder;
         static Button buttons[numUiButtons];
-        // Led led1;
-        // Button sw1, sw2;
-        QEI enc1;
-        int32_t pulses{0};
-        int32_t last_pulses{0};
-        uint8_t whatever{0};
-        int8_t controller_val{0};
+        static Encoder* encoders[numUiEncoders];        
+
+        friend class UiCtrlState;
+        friend class UiCfgState;
+
+        enum UiMode : std::uint8_t
+        {
+            ControllingTarget = 0,
+            ConfiguringSoftTouch,
+            numUiModes
+        };
+
+        UiStateInterface *current_mode;
+        UiCfgState cfg_mode;
+        UiCtrlState ctrl_mode;
         
-        Ui() :
-            // led1(LED1),
-            enc1(D2, D3, NC, 24, QEI::X2_ENCODING)
-            // sw1(SW1),
-            // sw2(SW3) 
-            {}
+        Ui() : cfg_mode(), ctrl_mode(), current_mode(&ctrl_mode) {}
 
         ~Ui() {}
 
@@ -88,42 +80,25 @@ namespace soft_touch {
             if (heartbeat_counter ==    0) Light(BoardRedLed, true);
             if (heartbeat_counter == 0x10) {
                 Light(BoardRedLed, false);
-                for (uint8_t i = 0; i < numUiButtons; i++)
-                {
-                    if (buttons[i].pressed()) 
-                    {
-                        printf("button %i pressed!\r\n", i); 
-                    }
-                    else if (buttons[i].released())
-                    {
-                        printf("button %i released! \r\n", i);
-                    }
-                }
             }
             ++heartbeat_counter;
         }
 
-        void UpdateEncoder()
+        void ChangeMode(UiMode new_mode)
         {
-            int8_t delta;
-            if (pulses != last_pulses) 
+            switch (new_mode)
             {
-                (pulses > last_pulses) ? (delta = 1) : (delta = -1);                   
-                last_pulses = pulses;
-                controller_val = ClampEncoderInt8Reading(controller_val, delta);
-                STLCD::instance().Write_Msg("a");
-                STLCD::instance().Colon(true);
-                STLCD::instance().WriteUint8H(STLCD::RH, controller_val);
-                STEventMessage m = {STNode::Ui, STNode::SysCtrl, STEvent::SysCtrlUpdateTargetCtrlVal, delta};
-                STEvent rv = SystemController::instance().Post(m);
-                (rv == EventMsgRx) ? : printf("Failed to send to SysCtrl\r\n");
+                case ControllingTarget:
+                    current_mode = &ctrl_mode;
+                    printf("mode -> controlling target\r\n");
+                    break;
+                case ConfiguringSoftTouch:
+                    current_mode = &cfg_mode;
+                    printf("mode -> configuring soft touch\r\n");
+                    break;
+                default:
+                    break;
             }
-        }
-
-
-        int8_t ClampEncoderInt8Reading(int8_t cv, int8_t d)
-        {
-            return (cv + d) < 0 ? 0 : (INT8_MAX < (cv + d) ? INT8_MAX : (cv + d));
         }
     };
 

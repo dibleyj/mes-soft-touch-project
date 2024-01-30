@@ -4,12 +4,11 @@
 namespace soft_touch
 {
 
-class UiCfgState : public UiStateInterface
+class UiCtrlState : public UiStateInterface
 {
-public: 
-    UiCfgState() 
-        : UiStateInterface() {}
-    
+public:
+    UiCtrlState() : UiStateInterface() {}
+
     void Turn(EncoderId id, int8_t delta);
 
     void PressAndHold(ButtonId id);
@@ -19,8 +18,8 @@ public:
     void ReleaseFromHold(ButtonId id);
     
     void Light(LightId id, bool on);
+private:
 
-private: 
 };
 
 }

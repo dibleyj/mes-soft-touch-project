@@ -20,7 +20,7 @@ enum STNode : std::uint8_t
 {
     None,
     DevCli,
-    Ui,
+    UiMgr,
     UsbMidi,
     SysCtrl,
     numStEventSources
@@ -44,6 +44,27 @@ struct STEventMessage
     STNode dst;
     STEvent e;
     int32_t v;
+};
+
+enum EncoderId : std::uint8_t
+{   
+    MainEncoder,
+    numUiEncoders
+};
+
+enum ButtonId : std::uint8_t
+{   
+    BoardSwLH,
+    BoardSwRH,
+    EncoderSw,
+    numUiButtons
+};
+
+enum LightId : std::uint8_t 
+{
+    BoardGreenLed,
+    BoardRedLed,
+    numUiLights
 };
 
 }

@@ -12,7 +12,10 @@ public:
     virtual ~SysCtrlMappingInterface(){}
     virtual void UpdateMapping(STEventMessage m) = 0;
 
-    
+private:
+    uint8_t index;
+    uint8_t target_chan;
+    uint8_t target_cc;
 };
 
 }
