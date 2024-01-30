@@ -89,9 +89,9 @@ namespace soft_touch {
         void Heartbeat()
         {
             static uint8_t heartbeat_counter{0};
-            if (heartbeat_counter ==    0) Light(BoardRedLed, true);
+            if (heartbeat_counter ==    0) Light(BoardGreenLed, true);
             if (heartbeat_counter == 0x10) {
-                Light(BoardRedLed, false);
+                Light(BoardGreenLed, false);
             }
             ++heartbeat_counter;
         }
