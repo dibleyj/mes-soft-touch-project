@@ -20,6 +20,12 @@ public:
     void Process()
     {
         ProcessEventsToHost();
+        // TODO: Polling the incoming MIDI data isn't really 
+        // good enough - 1ms is not quite fast enough and we will 
+        // eventually want incoming stuff for visual feedback, etc. 
+        // Rather we should use the USBMIDI driver's 
+        // "MIDI Event has arrived" callback...
+        ProcessEventsFromHost();
     } 
 
     STEvent Post(STEventMessage msg)
@@ -51,6 +57,15 @@ private:
         default:
             break;
         }
+    }
+
+    void ProcessEventsFromHost()
+    {
+        // TODO: Not implemented yet!
+        // Parse (several kinds of) MIDI message
+        // Make an STEventMessage 
+        // Pack channel, etc
+        // Send to SysCtrl queue
     }
 
     void SendMidiCcMsgToHost(int32_t value)
