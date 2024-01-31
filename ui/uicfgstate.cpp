@@ -48,7 +48,7 @@ void UiCfgState::Light(LightId id, bool on)
 
 void UiCfgState::WriteToDisplay(DisplayId id, uint8_t* bytestring)
 {
-    printf("cfg->wr_display, %u %u\r\n", bytestring[0], bytestring[3]);
+    // printf("cfg->wr_display, %u %u\r\n", bytestring[0], bytestring[3]);
     switch (id)
     {
     case KL46ZSegmentLcd:
