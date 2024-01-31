@@ -53,20 +53,23 @@ Assembled against a Bourns PEC11R rotational encoder https://uk.farnell.com/bour
 * theoretical max output from single encoder: 24 pulses per second 
 * so min. sampling rate: 96 samples per second
 
+The `QEI` library (see below) took care of driving this part. 
 
 ## Attribution and licenses
 
-
-
 ### Mbed OS
 
+```
 [Mbed OS] is provided under the Apache-2.0 license. Contributions to this project are accepted under the same license. 
 
 This project [i.e., Mbed OS] contains code from other projects. The original license text is included in those source files. They must comply with our license guide.
+```
+
+This platform provided the USB MIDI driver stack.
 
 ### CLI implementation
 
-The CLI implementation in this project is a fairly crude CPP port of the code Elecia presented in the Wokwi RPi simulation, extended with some new cnmmands.
+The CLI implementation in this project is a fairly crude CPP port of the code Elecia presented in the Wokwi RPi simulation, ~extended with some new cnmmands~ (not really, I ran out of time.. would have helped, though!).
 
 ### Quadrature Encoder Interface (QEI)
 
