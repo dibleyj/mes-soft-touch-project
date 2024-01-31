@@ -91,7 +91,7 @@ As mentioned above, these include:
 
 ![alt text](https://github.com/dibleyj/mes-soft-touch-project/blob/c60c99cddcf5087e1536f1bf705fbc21097e174e/docs/hwarch.png "hardware architecture diag for Soft Touch")
 
-### Software architecture
+### Software architecture
 
 ![alt text](https://github.com/dibleyj/mes-soft-touch-project/blob/c60c99cddcf5087e1536f1bf705fbc21097e174e/docs/swarch.png "software architecture hierarchy for Soft Touch")
 ## Build instructions
