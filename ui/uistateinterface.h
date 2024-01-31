@@ -17,6 +17,7 @@ public:
     virtual void Release(ButtonId id) = 0;
     virtual void ReleaseFromHold(ButtonId id) = 0;
     virtual void Light(LightId id, bool on) = 0;
+    virtual void WriteToDisplay(DisplayId id, uint8_t* bytestring) = 0;
 };
 
 }

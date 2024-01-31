@@ -22,4 +22,9 @@ namespace soft_touch
         &main_enc
     };
 
+    STLCD* Ui::displays[numUiDisplays] =
+    {
+        &(STLCD::instance())
+    };
+
 }

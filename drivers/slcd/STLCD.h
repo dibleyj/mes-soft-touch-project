@@ -48,6 +48,14 @@ public:
         if (res == OK) Write_Msg(field, 2);
     }
 
+    void
+    WriteChar(Position pos, uint8_t val)
+    {
+        CharPosition = static_cast<uint8_t>(pos);
+        uint8_t field[2]{' ',' '};
+        UtilResult res = UtilIntNibbleToHexChar(val, field);
+        if (res == OK) Write_Msg(field, 2);
+    }
 
     private:
 

@@ -18,6 +18,8 @@ public:
     void ReleaseFromHold(ButtonId id);
     
     void Light(LightId id, bool on);
+
+    void WriteToDisplay(DisplayId id, uint8_t* bytestring);
 private:
 
 };

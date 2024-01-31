@@ -36,9 +36,9 @@ int main()
     while(1) 
     {
         ThisThread::sleep_for(1ms);
+        SystemController::instance().Process();
         Console::instance().Process();
         UsbMidiTransceiver::instance().Process();
-        SystemController::instance().Process();
         Ui::instance().Process();
     }
 }

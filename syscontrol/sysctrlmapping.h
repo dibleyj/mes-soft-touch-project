@@ -2,6 +2,7 @@
 #include "soft_touch.h"
 #include "sysctrlmappinginterface.h"
 #include "UsbMidiTransceiver.h"
+#include "ui.h"
 
 namespace soft_touch 
 {
@@ -45,22 +46,18 @@ public:
         MidiCc102 = 102, // 102-119 conveniently undefined
     };
 
+    void UpdateMappingTargetValue(int8_t delta);
+
+    uint8_t ReadTargetValue()
+    {
+        return target_value;
+    }
+
 private:
+
     uint8_t target_value;
     
-    void UpdateMappingTargetValue(int8_t delta)
-    {
-        uint8_t nv = ClampEncoderInt8Reading(target_value, delta);
-        if (nv != target_value) target_value = nv;
-        // printf("mapping %u is now -> %u\r\n", index, target_value);
-        // TODO: Send to UsbMidi
-        STEventMessage midi_m{SysCtrl, UsbMidi, UsbMidiCcMsgToHost, 0};
-        midi_m.v = (target_chan << 24 | target_cc << 16 | target_value );
-        // printf("midi_m.v = %X\r\n", midi_m.v);
-        UsbMidiTransceiver::instance().Post(midi_m);
-        // TODO: Send to Ui
-
-    }
+    
 
     int8_t ClampEncoderInt8Reading(int8_t cv, int8_t d)
     {

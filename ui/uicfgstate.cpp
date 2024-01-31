@@ -1,6 +1,7 @@
 #include "uicfgstate.h"
 #include "sysctrlmapping.h"
 #include "ui.h"
+#include "system.h"
 
 namespace soft_touch
 {
@@ -45,5 +46,20 @@ void UiCfgState::Light(LightId id, bool on)
 
 }
 
+void UiCfgState::WriteToDisplay(DisplayId id, uint8_t* bytestring)
+{
+    printf("cfg->wr_display, %u %u\r\n", bytestring[0], bytestring[3]);
+    switch (id)
+    {
+    case KL46ZSegmentLcd:
+        Ui::instance().displays[KL46ZSegmentLcd]->ClearDigitPair(STLCD::RH);
+        Ui::instance().displays[KL46ZSegmentLcd]->WriteUint8H(STLCD::LH, bytestring[0]);
+        Ui::instance().displays[KL46ZSegmentLcd]->WriteUint8H(STLCD::RH, bytestring[3]);
+        
+        break;
+    default:
+        break;
+    }
+}
 
 }

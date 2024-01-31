@@ -36,6 +36,7 @@ enum STEvent : std::uint16_t
     SysCtrlUpdateTargetCtrlVal,
     SysCtrlLoadMapping,
     UsbMidiCcMsgToHost,
+    UiDisplayUpdate,
     numSTEvents
 };
 
@@ -66,6 +67,12 @@ enum LightId : std::uint8_t
     BoardGreenLed,
     BoardRedLed,
     numUiLights
+};
+
+enum DisplayId : std::uint8_t
+{
+    KL46ZSegmentLcd,
+    numUiDisplays
 };
 
 }

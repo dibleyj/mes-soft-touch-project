@@ -52,6 +52,7 @@ private:
         if (rx_events.empty()) return; 
         STEventMessage rx = {STNode::None, STNode::None, STEvent::Invalid, 0};
         rx_events.pop(rx);
+        // printf("rx_events now has: %u items\r\n", rx_events.size());
         switch (rx.e)
         {
         case SysCtrlLoadMapping:
@@ -76,6 +77,12 @@ private:
         current_map_idx = new_map_idx;
         mapping = &(mappings[current_map_idx]);
         printf("new mapping: %u\r\n", current_map_idx);
+        // TODO: Send to Ui
+        STEventMessage ui_m{SysCtrl, UiMgr, UiDisplayUpdate, 0};
+        // encapsulation? what encapsulation? what a mess
+        ui_m.v = (current_map_idx + 1) << 24 | mappings[current_map_idx].ReadTargetValue();
+        STEvent rv = Ui::instance().Post(ui_m);
+        (rv == EventMsgRx) ? : printf("CtrlMapping failed to send to Ui\r\n");
     }
 
     SysCtrlMappingInterface *mapping; 
