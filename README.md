@@ -1,7 +1,5 @@
 # JD's Soft Touch 
 
-Test after renaming repo.
-
 ## Pitch
 
 Soft Touch is a tech demo for a USB MIDI control surface providing a single endless rotary encoder. The encoder can be assigned to send USB-MIDI Control Change messages.
